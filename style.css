@@ -2061,6 +2061,36 @@ textarea.form-control {
   }
 }
 
+/* Mobile/tablet fallback: disable pinned horizontal scroll and allow swipe */
+@media (max-width: 900px) {
+  /* Skills fallback */
+  .skills--hscroll .container { position: static; top: auto; }
+  .skills--hscroll[data-hscroll-ready="true"] { height: auto !important; }
+  .skills--hscroll .skills-grid-min {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    transform: none !important;
+    padding: 8px 12px 12px 2px;
+  }
+  .skills--hscroll .skills-group { scroll-snap-align: start; }
+
+  /* Achievements fallback */
+  .achievements--hscroll .container { position: static; top: auto; }
+  .achievements--hscroll[data-hscroll-ready="true"] { height: auto !important; }
+  .achievements--hscroll .achievements-grid {
+    transform: none !important;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+  .achievements--hscroll .achievement-card { scroll-snap-align: start; }
+}
+
 @media (max-width: 480px) {
   .container {
   padding: 0 16px;

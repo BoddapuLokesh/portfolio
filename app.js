@@ -336,19 +336,28 @@ document.addEventListener('DOMContentLoaded', function() {
     const achRow = document.querySelector('#achievements.achievements--hscroll .achievements-grid');
     if (achWrap && achRow) {
         function layoutAchHScroll() {
+            // Enable pinned behavior only on larger screens
+            const enablePinned = window.innerWidth > 900;
+            if (!enablePinned) {
+                achWrap.style.removeProperty('--ach-h');
+                achWrap.removeAttribute('data-hscroll-ready');
+                achRow.style.transform = 'none';
+                return;
+            }
             const navbarH = (document.querySelector('.navbar')?.offsetHeight || 70);
             const viewportH = window.innerHeight;
             const stickyH = viewportH - navbarH - 16;
             const container = achWrap.querySelector('.container');
             const overflowX = Math.max(0, achRow.scrollWidth - container.clientWidth);
-            const SPEED_RATIO = 1.8; // match skills speed
-            const travel = overflowX * SPEED_RATIO + 300; // match skills extra travel
-            achWrap.style.setProperty('--ach-h', `${Math.max(travel, stickyH + 200)}px`); // match skills min height buffer
+            const SPEED_RATIO = 1.8;
+            const travel = overflowX * SPEED_RATIO + 300;
+            achWrap.style.setProperty('--ach-h', `${Math.max(travel, stickyH + 200)}px`);
             achWrap.setAttribute('data-hscroll-ready', 'true');
         }
 
         let rafA;
         function onAchHScroll() {
+            if (window.innerWidth <= 900) return; // disable on small screens
             const rect = achWrap.getBoundingClientRect();
             const navbarH = (document.querySelector('.navbar')?.offsetHeight || 70);
             const start = navbarH;
@@ -382,24 +391,27 @@ document.addEventListener('DOMContentLoaded', function() {
     if (skillsSection && skillsRow) {
         // Prepare heights so vertical scroll length equals the horizontal overflow we need
         function layoutHScroll() {
+            const enablePinned = window.innerWidth > 900;
+            if (!enablePinned) {
+                skillsSection.style.removeProperty('--hscroll-height');
+                skillsSection.removeAttribute('data-hscroll-ready');
+                skillsRow.style.transform = 'none';
+                return;
+            }
             const navbarH = (document.querySelector('.navbar')?.offsetHeight || 70);
             const viewportH = window.innerHeight;
-            // available sticky height area inside section
             const stickyH = viewportH - navbarH - 16; // padding allowance
-            // total horizontal distance we need to move (track width - container width)
             const container = skillsSection.querySelector('.container');
             const overflowX = Math.max(0, skillsRow.scrollWidth - container.clientWidth);
-            // Slow the horizontal transition by requiring more vertical travel
             const SPEED_RATIO = 1.8; // >1 means slower horizontal movement per vertical pixel
-            // Vertical scroll distance we’ll allocate for this effect
             const travel = overflowX * SPEED_RATIO + 300;
-            // Set a CSS var for height and mark ready
             skillsSection.style.setProperty('--hscroll-height', `${Math.max(travel, stickyH + 200)}px`);
             skillsSection.setAttribute('data-hscroll-ready', 'true');
         }
 
         let rAF;
         function onHScroll() {
+            if (window.innerWidth <= 900) return; // disable on small screens
             const rect = skillsSection.getBoundingClientRect();
             const navbarH = (document.querySelector('.navbar')?.offsetHeight || 70);
             const start = navbarH; // when section top hits sticky top
