@@ -1,0 +1,536 @@
+// Portfolio JavaScript Functionality
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Mobile Navigation Toggle
+    const hamburger = document.getElementById('hamburger');
+    const navMenu = document.getElementById('nav-menu');
+    const navLinks = document.querySelectorAll('.nav-link');
+
+    // Toggle mobile menu
+    if (hamburger && navMenu) {
+        hamburger.addEventListener('click', function() {
+            hamburger.classList.toggle('active');
+            navMenu.classList.toggle('active');
+            document.body.style.overflow = navMenu.classList.contains('active') ? 'hidden' : '';
+        });
+    }
+
+    // Close mobile menu when clicking on a nav link
+    navLinks.forEach(link => {
+        link.addEventListener('click', function() {
+            if (hamburger && navMenu) {
+                hamburger.classList.remove('active');
+                navMenu.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
+    });
+
+    // Close mobile menu when clicking outside
+    document.addEventListener('click', function(event) {
+        if (hamburger && navMenu && !hamburger.contains(event.target) && !navMenu.contains(event.target)) {
+            hamburger.classList.remove('active');
+            navMenu.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+    });
+
+    // Smooth Scrolling for Navigation Links - FIXED
+    navLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            const href = this.getAttribute('href');
+            
+            // Only handle internal links (starting with #)
+            if (href && href.startsWith('#')) {
+                e.preventDefault();
+                const targetId = href;
+                const targetSection = document.querySelector(targetId);
+                
+                if (targetSection) {
+                    const navbarHeight = document.querySelector('.navbar').offsetHeight || 70;
+                    const offsetTop = targetSection.getBoundingClientRect().top + window.pageYOffset - navbarHeight;
+                    
+                    window.scrollTo({
+                        top: offsetTop,
+                        behavior: 'smooth'
+                    });
+                }
+            }
+        });
+    });
+
+    // Active Navigation Link Highlighting
+    function highlightActiveNavLink() {
+        const sections = document.querySelectorAll('section');
+        const scrollPos = window.scrollY + 100;
+
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop;
+            const sectionHeight = section.offsetHeight;
+            const sectionId = section.getAttribute('id');
+            const correspondingNavLink = document.querySelector(`.nav-link[href="#${sectionId}"]`);
+
+            if (scrollPos >= sectionTop && scrollPos < sectionTop + sectionHeight) {
+                navLinks.forEach(link => link.classList.remove('active'));
+                if (correspondingNavLink) {
+                    correspondingNavLink.classList.add('active');
+                }
+            }
+        });
+    }
+
+    // Navbar Background Change on Scroll
+    function updateNavbarOnScroll() {
+        const navbar = document.querySelector('.navbar');
+        if (navbar) {
+            if (window.scrollY > 50) {
+                navbar.style.background = 'rgba(255, 255, 255, 0.98)';
+                navbar.style.boxShadow = '0 2px 20px rgba(44, 62, 80, 0.1)';
+            } else {
+                navbar.style.background = 'rgba(255, 255, 255, 0.95)';
+                navbar.style.boxShadow = 'none';
+            }
+        }
+    }
+
+    // Scroll Event Listeners
+    let ticking = false;
+    function onScroll() {
+        if (!ticking) {
+            requestAnimationFrame(() => {
+                highlightActiveNavLink();
+                updateNavbarOnScroll();
+                ticking = false;
+            });
+            ticking = true;
+        }
+    }
+
+    window.addEventListener('scroll', onScroll);
+
+    // Removed scroll-triggered fade-in animations for a cleaner, instant render
+
+    // Skill Card Hover Effects
+    const skillCards = document.querySelectorAll('.skill-card');
+    skillCards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-8px)';
+        });
+
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+
+    // Skill Hexagon Rotation Effect
+    const skillHexagons = document.querySelectorAll('.skill-hexagon');
+    skillHexagons.forEach(hexagon => {
+        hexagon.addEventListener('mouseenter', function() {
+            this.style.transform = 'rotate(8deg)';
+        });
+
+        hexagon.addEventListener('mouseleave', function() {
+            this.style.transform = 'rotate(0deg)';
+        });
+    });
+
+    // Project Card Hover Effects
+    const projectCards = document.querySelectorAll('.project-card');
+    projectCards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-12px)';
+            this.style.boxShadow = '0 20px 50px rgba(44, 62, 80, 0.25)';
+        });
+
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+            this.style.boxShadow = '0 4px 15px rgba(44, 62, 80, 0.1)';
+        });
+    });
+
+    // Contact Form Handling - FIXED
+    const contactForm = document.getElementById('contact-form');
+    if (contactForm) {
+        contactForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const name = formData.get('name').trim();
+            const email = formData.get('email').trim();
+            const subject = formData.get('subject').trim();
+            const message = formData.get('message').trim();
+
+            // Basic form validation
+            if (!name || !email || !subject || !message) {
+                showNotification('Please fill in all fields.', 'error');
+                return;
+            }
+
+            if (!isValidEmail(email)) {
+                showNotification('Please enter a valid email address.', 'error');
+                return;
+            }
+
+            // Simulate form submission
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            
+            submitBtn.textContent = 'Sending...';
+            submitBtn.disabled = true;
+            submitBtn.style.opacity = '0.7';
+
+            // Simulate API call delay
+            setTimeout(() => {
+                showNotification('Thank you for your message! I\'ll get back to you soon.', 'success');
+                this.reset();
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+                submitBtn.style.opacity = '1';
+            }, 1500);
+        });
+    }
+
+    // Email Validation Helper
+    function isValidEmail(email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    }
+
+    // Notification System - ENHANCED
+    function showNotification(message, type = 'info') {
+        // Remove existing notifications
+        const existingNotifications = document.querySelectorAll('.notification');
+        existingNotifications.forEach(notification => {
+            notification.remove();
+        });
+
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `notification notification--${type}`;
+        
+        // Set notification styles based on type
+        const colors = {
+            success: { bg: '#2C3E50', border: '#8B7355' },
+            error: { bg: '#e74c3c', border: '#c0392b' },
+            info: { bg: '#34495E', border: '#2C3E50' }
+        };
+
+        const color = colors[type] || colors.info;
+
+        notification.innerHTML = `
+            <div class="notification-content">
+                <span class="notification-message">${message}</span>
+                <button class="notification-close" type="button">×</button>
+            </div>
+        `;
+
+        // Add styles
+        notification.style.cssText = `
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            background: ${color.bg};
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            border-left: 4px solid ${color.border};
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 10000;
+            max-width: 400px;
+            min-width: 300px;
+            transform: translateX(120%);
+            transition: transform 0.3s ease;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            line-height: 1.4;
+        `;
+
+        const notificationContent = notification.querySelector('.notification-content');
+        notificationContent.style.cssText = `
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 1rem;
+        `;
+
+        const closeBtn = notification.querySelector('.notification-close');
+        closeBtn.style.cssText = `
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.3s ease;
+            flex-shrink: 0;
+        `;
+
+        // Close button functionality
+        closeBtn.addEventListener('click', function() {
+            if (notification.parentElement) {
+                notification.style.transform = 'translateX(120%)';
+                setTimeout(() => {
+                    if (notification.parentElement) {
+                        notification.remove();
+                    }
+                }, 300);
+            }
+        });
+
+        closeBtn.addEventListener('mouseenter', function() {
+            this.style.background = 'rgba(255,255,255,0.2)';
+        });
+
+        closeBtn.addEventListener('mouseleave', function() {
+            this.style.background = 'none';
+        });
+
+        document.body.appendChild(notification);
+
+        // Animate in
+        requestAnimationFrame(() => {
+            notification.style.transform = 'translateX(0)';
+        });
+
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            if (notification.parentElement) {
+                notification.style.transform = 'translateX(120%)';
+                setTimeout(() => {
+                    if (notification.parentElement) {
+                        notification.remove();
+                    }
+                }, 300);
+            }
+        }, 5000);
+    }
+
+    // Removed hero fade-in animation for immediate content visibility
+
+    // Parallax Effect for Hero Section
+    function parallaxEffect() {
+        const scrolled = window.pageYOffset;
+        const heroSection = document.querySelector('.hero');
+        
+        if (heroSection && scrolled < window.innerHeight) {
+            const rate = scrolled * -0.1;
+            heroSection.style.transform = `translateY(${rate}px)`;
+        }
+    }
+
+    // Add parallax effect on scroll (only on larger screens)
+    window.addEventListener('scroll', function() {
+        if (window.innerWidth > 768) {
+            requestAnimationFrame(parallaxEffect);
+        }
+    });
+
+    // Achievements horizontal-on-vertical scroll (pinned)
+    const achWrap = document.querySelector('#achievements.achievements--hscroll');
+    const achRow = document.querySelector('#achievements.achievements--hscroll .achievements-grid');
+    if (achWrap && achRow) {
+        function layoutAchHScroll() {
+            const navbarH = (document.querySelector('.navbar')?.offsetHeight || 70);
+            const viewportH = window.innerHeight;
+            const stickyH = viewportH - navbarH - 16;
+            const container = achWrap.querySelector('.container');
+            const overflowX = Math.max(0, achRow.scrollWidth - container.clientWidth);
+            const SPEED_RATIO = 1.8; // match skills speed
+            const travel = overflowX * SPEED_RATIO + 300; // match skills extra travel
+            achWrap.style.setProperty('--ach-h', `${Math.max(travel, stickyH + 200)}px`); // match skills min height buffer
+            achWrap.setAttribute('data-hscroll-ready', 'true');
+        }
+
+        let rafA;
+        function onAchHScroll() {
+            const rect = achWrap.getBoundingClientRect();
+            const navbarH = (document.querySelector('.navbar')?.offsetHeight || 70);
+            const start = navbarH;
+            const end = window.innerHeight;
+            const container = achWrap.querySelector('.container');
+            const maxX = Math.max(0, achRow.scrollWidth - container.clientWidth);
+
+            if (rect.top <= start && rect.bottom > end) {
+                const totalRange = rect.height - end + start;
+                const progress = Math.min(1, Math.max(0, (start - rect.top) / Math.max(1, totalRange)));
+                const tx = -progress * maxX;
+                achRow.style.transform = `translate3d(${tx}px,0,0)`;
+            } else if (rect.top > start) {
+                achRow.style.transform = 'translate3d(0,0,0)';
+            } else if (rect.bottom <= end) {
+                achRow.style.transform = `translate3d(${-maxX}px,0,0)`;
+            }
+        }
+
+        function onScrollAch() { if (rafA) return; rafA = requestAnimationFrame(() => { onAchHScroll(); rafA = null; }); }
+
+        layoutAchHScroll();
+        onAchHScroll();
+        window.addEventListener('resize', () => { layoutAchHScroll(); onAchHScroll(); });
+        window.addEventListener('scroll', onScrollAch, { passive: true });
+    }
+
+    // Skills horizontal-on-vertical scroll (pinned): map section scroll progress to X translate
+    const skillsSection = document.querySelector('.skills.skills--hscroll');
+    const skillsRow = document.querySelector('.skills.skills--hscroll .skills-grid-min');
+    if (skillsSection && skillsRow) {
+        // Prepare heights so vertical scroll length equals the horizontal overflow we need
+        function layoutHScroll() {
+            const navbarH = (document.querySelector('.navbar')?.offsetHeight || 70);
+            const viewportH = window.innerHeight;
+            // available sticky height area inside section
+            const stickyH = viewportH - navbarH - 16; // padding allowance
+            // total horizontal distance we need to move (track width - container width)
+            const container = skillsSection.querySelector('.container');
+            const overflowX = Math.max(0, skillsRow.scrollWidth - container.clientWidth);
+            // Slow the horizontal transition by requiring more vertical travel
+            const SPEED_RATIO = 1.8; // >1 means slower horizontal movement per vertical pixel
+            // Vertical scroll distance we’ll allocate for this effect
+            const travel = overflowX * SPEED_RATIO + 300;
+            // Set a CSS var for height and mark ready
+            skillsSection.style.setProperty('--hscroll-height', `${Math.max(travel, stickyH + 200)}px`);
+            skillsSection.setAttribute('data-hscroll-ready', 'true');
+        }
+
+        let rAF;
+        function onHScroll() {
+            const rect = skillsSection.getBoundingClientRect();
+            const navbarH = (document.querySelector('.navbar')?.offsetHeight || 70);
+            const start = navbarH; // when section top hits sticky top
+            const end = window.innerHeight; // when section bottom leaves viewport
+            const container = skillsSection.querySelector('.container');
+            const maxX = Math.max(0, skillsRow.scrollWidth - container.clientWidth);
+
+            if (rect.top <= start && rect.bottom > end) {
+                // progress from 0..1 while pinned
+                const totalRange = rect.height - end + start;
+                const progress = Math.min(1, Math.max(0, (start - rect.top) / Math.max(1, totalRange)));
+                const tx = -progress * maxX;
+                skillsRow.style.transform = `translate3d(${tx}px,0,0)`;
+            } else if (rect.top > start) {
+                skillsRow.style.transform = 'translate3d(0,0,0)';
+            } else if (rect.bottom <= end) {
+                skillsRow.style.transform = `translate3d(${-maxX}px,0,0)`;
+            }
+        }
+
+        // throttle via rAF
+        function onScrollPinned() {
+            if (rAF) return; rAF = requestAnimationFrame(() => { onHScroll(); rAF = null; });
+        }
+
+        layoutHScroll();
+        onHScroll();
+        window.addEventListener('resize', () => { layoutHScroll(); onHScroll(); });
+        window.addEventListener('scroll', onScrollPinned, { passive: true });
+    }
+
+    // Button Click Effects
+    const buttons = document.querySelectorAll('.btn');
+    buttons.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            // Create ripple effect
+            const ripple = document.createElement('span');
+            const rect = this.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = e.clientX - rect.left - size / 2;
+            const y = e.clientY - rect.top - size / 2;
+            
+            ripple.style.cssText = `
+                position: absolute;
+                width: ${size}px;
+                height: ${size}px;
+                left: ${x}px;
+                top: ${y}px;
+                background: rgba(255,255,255,0.3);
+                border-radius: 50%;
+                transform: scale(0);
+                animation: ripple 0.6s linear;
+                pointer-events: none;
+            `;
+            
+            this.style.position = 'relative';
+            this.style.overflow = 'hidden';
+            this.appendChild(ripple);
+            
+            setTimeout(() => {
+                if (ripple.parentElement) {
+                    ripple.remove();
+                }
+            }, 600);
+        });
+    });
+
+    // Add ripple animation keyframes and other styles
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes ripple {
+            to {
+                transform: scale(2);
+                opacity: 0;
+            }
+        }
+        
+        .nav-link.active {
+            color: #8B7355 !important;
+        }
+        
+        .nav-link.active::after {
+            width: 100% !important;
+        }
+        
+        .body.loaded {
+            opacity: 1;
+        }
+        
+        /* Ensure notification is always visible */
+        .notification {
+            font-weight: 500 !important;
+        }
+        
+        .notification-message {
+            word-wrap: break-word;
+        }
+    `;
+    document.head.appendChild(style);
+
+    // Removed section reveal-on-scroll fades
+
+    // Handle resize events
+    let resizeTimeout;
+    window.addEventListener('resize', function() {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(function() {
+            // Close mobile menu on resize to desktop
+            if (window.innerWidth > 768 && hamburger && navMenu) {
+                hamburger.classList.remove('active');
+                navMenu.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        }, 250);
+    });
+
+    // Add loading state management
+    document.body.classList.add('loaded');
+
+    // Console welcome message
+    console.log('%c👋 Welcome to Lokesh Boddapu\'s Portfolio!', 'color: #2C3E50; font-size: 16px; font-weight: bold;');
+    console.log('%cFeel free to explore the code and connect with me!', 'color: #8B7355; font-size: 14px;');
+    
+    // Performance monitoring
+    window.addEventListener('load', function() {
+        const loadTime = performance.now();
+        console.log(`%cPage loaded in ${Math.round(loadTime)}ms`, 'color: #34495E;');
+    });
+
+    // Test notification system on page load (for debugging)
+    // setTimeout(() => {
+    //     showNotification('Portfolio loaded successfully!', 'success');
+    // }, 2000);
+});
