@@ -110,43 +110,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Removed scroll-triggered fade-in animations for a cleaner, instant render
 
-    // Skill Card Hover Effects
-    const skillCards = document.querySelectorAll('.skill-card');
-    skillCards.forEach(card => {
-        card.addEventListener('mouseenter', function() {
-            this.style.transform = 'translateY(-8px)';
-        });
+    // These elements don't exist in current HTML - removing unused code
 
-        card.addEventListener('mouseleave', function() {
-            this.style.transform = 'translateY(0)';
-        });
-    });
-
-    // Skill Hexagon Rotation Effect
-    const skillHexagons = document.querySelectorAll('.skill-hexagon');
-    skillHexagons.forEach(hexagon => {
-        hexagon.addEventListener('mouseenter', function() {
-            this.style.transform = 'rotate(8deg)';
-        });
-
-        hexagon.addEventListener('mouseleave', function() {
-            this.style.transform = 'rotate(0deg)';
-        });
-    });
-
-    // Project Card Hover Effects
-    const projectCards = document.querySelectorAll('.project-card');
-    projectCards.forEach(card => {
-        card.addEventListener('mouseenter', function() {
-            this.style.transform = 'translateY(-12px)';
-            this.style.boxShadow = '0 20px 50px rgba(44, 62, 80, 0.25)';
-        });
-
-        card.addEventListener('mouseleave', function() {
-            this.style.transform = 'translateY(0)';
-            this.style.boxShadow = '0 4px 15px rgba(44, 62, 80, 0.1)';
-        });
-    });
+    // Optimized: Single hover effect for project cards using CSS transitions
 
     // Contact Form Handling - FIXED
     const contactForm = document.getElementById('contact-form');
@@ -313,23 +279,26 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Removed hero fade-in animation for immediate content visibility
 
-    // Parallax Effect for Hero Section
+    // Optimized parallax with requestAnimationFrame and throttling
+    let parallaxTicking = false;
     function parallaxEffect() {
-        const scrolled = window.pageYOffset;
-        const heroSection = document.querySelector('.hero');
+        if (parallaxTicking) return;
+        parallaxTicking = true;
         
-        if (heroSection && scrolled < window.innerHeight) {
-            const rate = scrolled * -0.1;
-            heroSection.style.transform = `translateY(${rate}px)`;
-        }
+        requestAnimationFrame(() => {
+            if (window.innerWidth > 768) {
+                const scrolled = window.pageYOffset;
+                const heroSection = document.querySelector('.hero');
+                if (heroSection && scrolled < window.innerHeight) {
+                    const rate = scrolled * -0.1;
+                    heroSection.style.transform = `translateY(${rate}px)`;
+                }
+            }
+            parallaxTicking = false;
+        });
     }
 
-    // Add parallax effect on scroll (only on larger screens)
-    window.addEventListener('scroll', function() {
-        if (window.innerWidth > 768) {
-            requestAnimationFrame(parallaxEffect);
-        }
-    });
+    window.addEventListener('scroll', parallaxEffect, { passive: true });
 
     // Achievements horizontal-on-vertical scroll (pinned)
     const achWrap = document.querySelector('#achievements.achievements--hscroll');
@@ -540,9 +509,4 @@ document.addEventListener('DOMContentLoaded', function() {
         const loadTime = performance.now();
         console.log(`%cPage loaded in ${Math.round(loadTime)}ms`, 'color: #34495E;');
     });
-
-    // Test notification system on page load (for debugging)
-    // setTimeout(() => {
-    //     showNotification('Portfolio loaded successfully!', 'success');
-    // }, 2000);
 });

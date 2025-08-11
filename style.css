@@ -533,79 +533,9 @@ select.form-control {
   margin-bottom: var(--space-16);
 }
 
-/* Card component */
-.card {
-  background-color: var(--color-surface);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--color-card-border);
-  box-shadow: var(--shadow-sm);
-  overflow: hidden;
-  transition: box-shadow var(--duration-normal) var(--ease-standard);
-}
+/* Removed unused card component - not used in current design */
 
-.card:hover {
-  box-shadow: var(--shadow-md);
-}
-
-.card__body {
-  padding: var(--space-16);
-}
-
-.card__header,
-.card__footer {
-  padding: var(--space-16);
-  border-bottom: 1px solid var(--color-card-border-inner);
-}
-
-/* Status indicators - simplified with CSS variables */
-.status {
-  display: inline-flex;
-  align-items: center;
-  padding: var(--space-6) var(--space-12);
-  border-radius: var(--radius-full);
-  font-weight: var(--font-weight-medium);
-  font-size: var(--font-size-sm);
-}
-
-.status--success {
-  background-color: rgba(
-    var(--color-success-rgb, 33, 128, 141),
-    var(--status-bg-opacity)
-  );
-  color: var(--color-success);
-  border: 1px solid
-    rgba(var(--color-success-rgb, 33, 128, 141), var(--status-border-opacity));
-}
-
-.status--error {
-  background-color: rgba(
-    var(--color-error-rgb, 192, 21, 47),
-    var(--status-bg-opacity)
-  );
-  color: var(--color-error);
-  border: 1px solid
-    rgba(var(--color-error-rgb, 192, 21, 47), var(--status-border-opacity));
-}
-
-.status--warning {
-  background-color: rgba(
-    var(--color-warning-rgb, 168, 75, 47),
-    var(--status-bg-opacity)
-  );
-  color: var(--color-warning);
-  border: 1px solid
-    rgba(var(--color-warning-rgb, 168, 75, 47), var(--status-border-opacity));
-}
-
-.status--info {
-  background-color: rgba(
-    var(--color-info-rgb, 98, 108, 113),
-    var(--status-bg-opacity)
-  );
-  color: var(--color-info);
-  border: 1px solid
-    rgba(var(--color-info-rgb, 98, 108, 113), var(--status-border-opacity));
-}
+/* Removed unused status indicators - not used in current design */
 
 /* Container layout */
 .container {
@@ -637,76 +567,7 @@ select.form-control {
   }
 }
 
-/* Utility classes */
-.flex {
-  display: flex;
-}
-.flex-col {
-  flex-direction: column;
-}
-.items-center {
-  align-items: center;
-}
-.justify-center {
-  justify-content: center;
-}
-.justify-between {
-  justify-content: space-between;
-}
-.gap-4 {
-  gap: var(--space-4);
-}
-.gap-8 {
-  gap: var(--space-8);
-}
-.gap-16 {
-  gap: var(--space-16);
-}
-
-.m-0 {
-  margin: 0;
-}
-.mt-8 {
-  margin-top: var(--space-8);
-}
-.mb-8 {
-  margin-bottom: var(--space-8);
-}
-.mx-8 {
-  margin-left: var(--space-8);
-  margin-right: var(--space-8);
-}
-.my-8 {
-  margin-top: var(--space-8);
-  margin-bottom: var(--space-8);
-}
-
-.p-0 {
-  padding: 0;
-}
-.py-8 {
-  padding-top: var(--space-8);
-  padding-bottom: var(--space-8);
-}
-.px-8 {
-  padding-left: var(--space-8);
-  padding-right: var(--space-8);
-}
-.py-16 {
-  padding-top: var(--space-16);
-  padding-bottom: var(--space-16);
-}
-.px-16 {
-  padding-left: var(--space-16);
-  padding-right: var(--space-16);
-}
-
-.block {
-  display: block;
-}
-.hidden {
-  display: none;
-}
+/* Removed unused utility classes - keeping only what's needed */
 
 /* Accessibility */
 .sr-only {
@@ -726,20 +587,14 @@ select.form-control {
   outline-offset: 2px;
 }
 
-/* Dark mode specifics */
-[data-color-scheme="dark"] .btn--outline {
-  border: 1px solid var(--color-border-secondary);
-}
-
+/* Custom font loading */
 @font-face {
   font-family: 'FKGroteskNeue';
-  src: url('https://r2cdn.perplexity.ai/fonts/FKGroteskNeue.woff2')
-    format('woff2');
+  src: url('https://r2cdn.perplexity.ai/fonts/FKGroteskNeue.woff2') format('woff2');
 }
-
-/* END PERPLEXITY DESIGN SYSTEM */
 /* Custom Color Palette */
 :root {
+  /* Optimized color palette */
   --primary-dark: #2C3E50;
   --secondary-dark: #34495E;
   --accent-warm: #8B7355;
@@ -747,12 +602,8 @@ select.form-control {
   --off-white: #ECF0F1;
   --text-dark: #2C2C2C;
   --white: #FFFFFF;
-  --expert-color: #2C3E50;
-  --advanced-color: #34495E;
-  --intermediate-color: #8B7355;
   --shadow-light: rgba(44, 62, 80, 0.1);
   --shadow-medium: rgba(44, 62, 80, 0.15);
-  --shadow-dark: rgba(44, 62, 80, 0.2);
 }
 
 /* Base Styles */
@@ -907,7 +758,6 @@ h1, h2, h3, h4, h5, h6 {
 .hero--no-photo .hero-content { grid-template-columns: 1fr; max-width: 900px; margin: 0 auto; }
 .hero--no-photo .hero-text { text-align: left; }
 .hero--no-photo .hero-buttons { margin-top: 1rem; }
-.hero--no-photo .hero-social { margin-top: 0.5rem; }
 
 .hero-title {
   font-size: 3.25rem;
@@ -923,9 +773,6 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 500;
 }
 .hero-kicker { font-weight: 700; color: var(--text-dark); margin: 0 0 0.25rem; }
-.hero-social { display: flex; gap: 10px; margin-top: 10px; }
-.social-btn { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 999px; border: 1.5px solid rgba(44,62,80,0.2); color: var(--primary-dark); font-weight: 700; }
-.social-btn:hover { background: var(--primary-dark); color: var(--white); border-color: var(--primary-dark); }
 
 .hero-location {
   color: var(--secondary-dark);
@@ -941,13 +788,7 @@ h1, h2, h3, h4, h5, h6 {
   max-width: 70ch;
 }
 
-.hero-bullets { margin: 0 0 1rem 1.1rem; color: var(--secondary-dark); }
-.hero-bullets li { margin-bottom: 6px; }
-
-.hero-stats { display: flex; gap: 12px; margin: 0 0 1rem; }
-.hero-stat { background: var(--white); border: 1px solid rgba(44,62,80,0.08); box-shadow: 0 4px 14px rgba(44,62,80,0.06); padding: 10px 14px; border-radius: 10px; text-align: center; }
-.hero-stat .num { font-weight: 700; color: var(--primary-dark); font-size: 1.1rem; line-height: 1; }
-.hero-stat .label { font-size: 0.8rem; color: var(--text-secondary); }
+/* Removed unused hero elements */
 
 .hero-buttons {
   display: flex;
@@ -999,37 +840,7 @@ h1, h2, h3, h4, h5, h6 {
   justify-content: center;
 }
 
-.hero-image {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.profile-aura {
-  position: relative;
-  padding: 16px;
-  border-radius: 24px;
-  /* Soft background matching hero tone */
-  background: linear-gradient(180deg, rgba(255,255,255,0.65), rgba(255,255,255,0.35));
-  box-shadow:
-    0 20px 60px rgba(44, 62, 80, 0.18),
-    inset 0 1px 0 rgba(255,255,255,0.6),
-    inset 0 -1px 0 rgba(44,62,80,0.06);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-}
-
-.profile-photo {
-  width: clamp(320px, 30vw, 420px);
-  height: auto;
-  border-radius: 18px;
-  object-fit: contain;
-  object-position: center;
-  display: block;
-  margin: 0 auto;
-  box-shadow: 0 10px 30px rgba(44,62,80,0.12);
-  border: 1px solid rgba(44, 62, 80, 0.06);
-}
+/* Removed unused hero image and profile aura styles - not used in current no-photo layout */
 
 /* About Section */
 .about {
@@ -1082,8 +893,6 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .about-intro { font-size: 1.05rem; line-height: 1.8; margin-bottom: 1rem; color: var(--text-dark); }
-.about-highlights { margin: 0 0 1.25rem 1.2rem; padding: 0; color: var(--secondary-dark); }
-.about-highlights li { margin-bottom: 6px; }
 
 .about-intro strong {
   color: var(--primary-dark);
@@ -1120,11 +929,6 @@ h1, h2, h3, h4, h5, h6 {
 .institution, .university {
   color: var(--secondary-dark);
   margin-bottom: 0.4rem;
-}
-
-.academic-info {
-  color: var(--primary-dark);
-  font-weight: 600;
 }
 
 .about-description {
@@ -1299,237 +1103,9 @@ h1, h2, h3, h4, h5, h6 {
   height: var(--hscroll-height, 140vh);
 }
 
-.skill-category {
-  background: var(--white);
-  border-radius: 12px;
-  padding: 2rem;
-  box-shadow: 0 4px 15px var(--shadow-light);
-}
+/* Removed unused skill category and container styles - using minimal approach only */
 
-.skill-category-title {
-  color: var(--primary-dark);
-  font-size: 1.5rem;
-  margin-bottom: 1.5rem;
-  text-align: center;
-}
-
-/* Skill Cards */
-.skill-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-}
-
-.skill-card {
-  background: var(--off-white);
-  border-radius: 10px;
-  padding: 1.5rem;
-  text-align: center;
-  transition: all 0.3s ease;
-  border: 2px solid transparent;
-  cursor: pointer;
-}
-
-.skill-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 6px 20px var(--shadow-medium);
-}
-
-.skill-card.expert {
-  border-color: var(--expert-color);
-}
-
-.skill-card.expert:hover {
-  background: var(--expert-color);
-  color: var(--white);
-}
-
-.skill-card.advanced {
-  border-color: var(--advanced-color);
-}
-
-.skill-card.advanced:hover {
-  background: var(--advanced-color);
-  color: var(--white);
-}
-
-.skill-card.intermediate {
-  border-color: var(--intermediate-color);
-}
-
-.skill-card.intermediate:hover {
-  background: var(--intermediate-color);
-  color: var(--white);
-}
-
-.skill-name {
-  font-weight: 600;
-  font-size: 1.1rem;
-  margin-bottom: 0.5rem;
-}
-
-.skill-level {
-  font-size: 0.9rem;
-  opacity: 0.8;
-}
-
-/* Skill Hexagons */
-.skill-hexagon-grid {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 1rem;
-}
-
-.skill-hexagon {
-  width: 120px;
-  height: 104px;
-  position: relative;
-  margin: 20px 0;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.skill-hexagon::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: var(--light-grey);
-  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-  transition: all 0.3s ease;
-}
-
-.skill-hexagon.expert::before {
-  background: var(--expert-color);
-}
-
-.skill-hexagon.advanced::before {
-  background: var(--advanced-color);
-}
-
-.skill-hexagon.intermediate::before {
-  background: var(--intermediate-color);
-}
-
-.skill-hexagon span {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: var(--white);
-  font-weight: 600;
-  font-size: 0.9rem;
-  text-align: center;
-  z-index: 1;
-}
-
-.skill-hexagon:hover {
-  transform: rotate(5deg);
-}
-
-/* Skill Timeline */
-.skill-timeline {
-  position: relative;
-  padding-left: 30px;
-}
-
-.skill-timeline::before {
-  content: '';
-  position: absolute;
-  left: 15px;
-  top: 0;
-  bottom: 0;
-  width: 3px;
-  background: linear-gradient(to bottom, var(--primary-dark), var(--accent-warm));
-}
-
-.timeline-item {
-  position: relative;
-  margin-bottom: 2rem;
-}
-
-.timeline-item::before {
-  content: '';
-  position: absolute;
-  left: -22px;
-  top: 0;
-  width: 15px;
-  height: 15px;
-  border-radius: 50%;
-  background: var(--accent-warm);
-  border: 3px solid var(--white);
-}
-
-.timeline-content {
-  background: var(--off-white);
-  padding: 1.5rem;
-  border-radius: 10px;
-  border-left: 4px solid var(--light-grey);
-  transition: all 0.3s ease;
-}
-
-.timeline-content.expert {
-  border-left-color: var(--expert-color);
-}
-
-.timeline-content.advanced {
-  border-left-color: var(--advanced-color);
-}
-
-.timeline-content.intermediate {
-  border-left-color: var(--intermediate-color);
-}
-
-.timeline-content:hover {
-  transform: translateX(10px);
-  box-shadow: 0 4px 15px var(--shadow-light);
-}
-
-.timeline-content h4 {
-  color: var(--primary-dark);
-  margin-bottom: 0.5rem;
-}
-
-/* Skill Cloud */
-.skill-cloud {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 1rem;
-}
-
-.cloud-item {
-  padding: 0.8rem 1.5rem;
-  border-radius: 25px;
-  font-weight: 500;
-  transition: all 0.3s ease;
-  cursor: pointer;
-}
-
-.cloud-item.expert {
-  background: var(--expert-color);
-  color: var(--white);
-  font-size: 1.1rem;
-}
-
-.cloud-item.advanced {
-  background: var(--advanced-color);
-  color: var(--white);
-  font-size: 1rem;
-}
-
-.cloud-item.intermediate {
-  background: var(--intermediate-color);
-  color: var(--white);
-  font-size: 0.9rem;
-}
-
-.cloud-item:hover {
-  transform: rotate(-2deg);
-}
+/* Removed unused skill card variants, skill hexagon, skill cloud, and skill timeline styles */
 
 /* Experience Section */
 .experience {
@@ -1699,8 +1275,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .project-card:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 15px 40px var(--shadow-medium);
+  transform: translateY(-12px);
+  box-shadow: 0 20px 50px rgba(44, 62, 80, 0.25);
 }
 
 .project-header {
@@ -1761,24 +1337,7 @@ h1, h2, h3, h4, h5, h6 {
   background: var(--white);
 }
 
-/* Slider mode for achievements */
-.achievements--slider .achievements-grid {
-  display: flex;
-  gap: 1.25rem;
-  overflow-x: auto;
-  overflow-y: hidden;
-  scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
-  padding-bottom: 8px;
-}
-
-.achievements--slider .achievements-grid::-webkit-scrollbar { display: none; }
-.achievements--slider .achievements-grid { scrollbar-width: none; }
-
-.achievements--slider .achievement-card {
-  flex: 0 0 clamp(260px, 38vw, 360px);
-  scroll-snap-align: start;
-}
+/* Removed achievements slider - using horizontal scroll only */
 
 .achievement-card {
   background: var(--off-white);
@@ -1870,12 +1429,7 @@ h1, h2, h3, h4, h5, h6 {
   border-left: 4px solid transparent;
 }
 
-.skills--minimal .skill-category,
-.skills--minimal .skill-cards,
-.skills--minimal .skill-hexagon-grid,
-.skills--minimal .skill-timeline,
-.skills--minimal .skill-cloud { display: none; }
-/* Legacy styles left intact for other pages/modes */
+
 
 .contact-link:hover {
   background: var(--primary-dark);
@@ -2010,41 +1564,13 @@ textarea.form-control {
     font-size: 1.1rem;
   }
 
-  .profile-photo {
-    width: min(70vw, 360px);
-    height: auto;
-  }
-  .profile-aura {
-    padding: 12px;
-    border-radius: 20px;
-  }
-
   .section-title {
     font-size: 2rem;
-  }
-
-  .skills-container {
-    gap: 2rem;
-  }
-
-  .skill-cards {
-    grid-template-columns: 1fr;
-  }
-
-  .skill-hexagon-grid {
-    gap: 0.5rem;
-  }
-
-  .skill-hexagon {
-    width: 100px;
-    height: 87px;
   }
 
   .projects-grid {
     grid-template-columns: 1fr;
   }
-
-  .achievements--slider .achievement-card { flex-basis: clamp(260px, 70vw, 360px); }
 
   .contact-content {
     grid-template-columns: 1fr;
@@ -2107,19 +1633,6 @@ textarea.form-control {
   .btn {
     padding: 10px 20px;
     font-size: 0.9rem;
-  }
-
-  .profile-photo {
-    width: min(80vw, 300px);
-    height: auto;
-  }
-  .profile-aura {
-    padding: 10px;
-    border-radius: 18px;
-  }
-
-  .skill-card {
-    padding: 1rem;
   }
 
   .achievement-card {

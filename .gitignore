@@ -50,3 +50,6 @@ logs/
 *.zip
 *.tar
 *.gz
+
+
+OPTIMIZATION_SUMMARY.md
