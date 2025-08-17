@@ -723,8 +723,9 @@ h1, h2, h3, h4, h5, h6 {
   min-height: 100vh;
   display: flex;
   align-items: center;
+  justify-content: center;
   position: relative;
-  padding-top: 80px;
+  padding-top: 0;
   overflow: hidden;
 }
 
@@ -1884,7 +1885,7 @@ textarea.form-control {
   }
 
   .hero {
-    padding-top: 70px;
+    padding-top: 0;
   }
 
   .hero-title {
