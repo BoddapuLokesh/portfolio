@@ -872,13 +872,7 @@ h1, h2, h3, h4, h5, h6 {
   position: relative;
 }
 
-.typewriter::after {
-  content: '|';
-  position: absolute;
-  right: -5px;
-  color: #8b7355;
-  animation: blink 1s infinite;
-}
+/* Cursor removed - no longer needed after name */
 
 .typewriter-subtitle {
   display: inline-block;
