@@ -5,6 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lokesh Boddapu | Python Developer & AI-ML Engineer</title>
     <meta name="description" content="Professional portfolio of Lokesh Boddapu - Python Developer and AI-ML Engineer specializing in machine learning, deep learning, and web development.">
+    <!-- Enhanced SEO & Social -->
+    <meta name="theme-color" content="#2C3E50">
+    <link rel="canonical" href="https://boddapulokesh.github.io/portfolio">
+    <meta property="og:title" content="Lokesh Boddapu | AI/ML Engineer & Python Developer">
+    <meta property="og:description" content="AI/ML Engineer & Python Developer – Projects, skills, experience, and contact information.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://boddapulokesh.github.io/portfolio">
+    <meta property="og:image" content="https://boddapulokesh.github.io/portfolio/LokeshBoddapu.jpg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Lokesh Boddapu | AI/ML Engineer & Python Developer">
+    <meta name="twitter:description" content="Portfolio showcasing ML projects, web apps, and professional experience.">
+    <meta name="twitter:image" content="https://boddapulokesh.github.io/portfolio/LokeshBoddapu.jpg">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -35,20 +47,49 @@
 
     <!-- Hero Section -->
     <section id="home" class="hero hero--no-photo">
+        <!-- Animated background particles -->
+        <div class="hero-particles">
+            <div class="particle particle--1"></div>
+            <div class="particle particle--2"></div>
+            <div class="particle particle--3"></div>
+            <div class="particle particle--4"></div>
+            <div class="particle particle--5"></div>
+            <div class="particle particle--6"></div>
+        </div>
+        
         <div class="hero-container">
             <div class="hero-content">
                 <div class="hero-text">
-                    <p class="hero-kicker">Hello, I'm</p>
-                    <h1 class="hero-title">Lokesh Boddapu</h1>
-                    <h2 class="hero-subtitle">AI/ML Engineer & Python Developer</h2>
-                    <p class="hero-location">Visakhapatnam, Andhra Pradesh, India</p>
-                    <p class="hero-description">I build ML‑powered solutions and Python web apps. Passionate about simple, useful products and open to AI/ML & Software internship roles.</p>
-                    <div class="hero-buttons">
-                        <a href="Lokesh Boddapu - Resume.pdf" download class="btn btn--outline">My Resume</a>
-                        <a href="#contact" class="btn btn--primary">Contact Info</a>
+                    <p class="hero-kicker animate-fade-up">Hello, I'm</p>
+                    <h1 class="hero-title">
+                        <span class="typewriter" data-text="Lokesh Boddapu">Lokesh Boddapu</span>
+                    </h1>
+                    <h2 class="hero-subtitle">
+                        <span class="typewriter-subtitle" data-texts="AI/ML Engineer,Python Developer,Data Scientist,Software Engineer">AI/ML Engineer & Python Developer</span>
+                    </h2>
+                    <p class="hero-location animate-fade-up">Visakhapatnam, Andhra Pradesh, India</p>
+                    <p class="hero-description animate-fade-up">I build ML‑powered solutions and Python web apps. Passionate about simple, useful products and open to AI/ML & Software internship roles.</p>
+                    <div class="hero-buttons animate-fade-up">
+                        <a href="Lokesh Boddapu - Resume.pdf" download class="btn btn--outline btn--animated">
+                            <span>My Resume</span>
+                            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="m9 18 6-6-6-6"/>
+                            </svg>
+                        </a>
+                        <a href="#contact" class="btn btn--primary btn--animated">
+                            <span>Contact Info</span>
+                            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="m9 18 6-6-6-6"/>
+                            </svg>
+                        </a>
                     </div>
                 </div>
             </div>
+        </div>
+        
+        <!-- Scroll indicator -->
+        <div class="scroll-indicator">
+            <div class="scroll-arrow"></div>
         </div>
     </section>
 
@@ -59,7 +100,7 @@
             <div class="about-content about-content--with-photo">
                 <div class="about-photo">
                     <div class="photo-frame">
-                        <img src="LokeshBoddapu.jpg" alt="Lokesh Boddapu portrait" />
+                        <img src="LokeshBoddapu.jpg" alt="Portrait of Lokesh Boddapu" loading="lazy" decoding="async" width="400" height="500" />
                     </div>
                 </div>
                 <div class="about-main">
@@ -372,6 +413,6 @@
         </div>
     </footer>
 
-    <script src="app.js"></script>
+    <script src="app.js" defer></script>
 </body>
 </html>

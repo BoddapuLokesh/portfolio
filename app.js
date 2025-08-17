@@ -1,6 +1,110 @@
 // Portfolio JavaScript Functionality
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Typewriter Effect for Hero Section
+    function initTypewriter() {
+        const typewriterElement = document.querySelector('.typewriter');
+        const typewriterSubtitle = document.querySelector('.typewriter-subtitle');
+        
+        // Main title typewriter effect
+        if (typewriterElement) {
+            const text = typewriterElement.dataset.text;
+            typewriterElement.innerHTML = '';
+            
+            let i = 0;
+            const typeWriter = () => {
+                if (i < text.length) {
+                    typewriterElement.innerHTML += text.charAt(i);
+                    i++;
+                    setTimeout(typeWriter, 100);
+                } else {
+                    // Remove cursor after typing is complete
+                    setTimeout(() => {
+                        typewriterElement.style.borderRight = 'none';
+                    }, 1000);
+                }
+            };
+            
+            // Start typing after a delay
+            setTimeout(typeWriter, 800);
+        }
+        
+        // Subtitle rotating typewriter effect
+        if (typewriterSubtitle) {
+            const texts = typewriterSubtitle.dataset.texts.split(',');
+            let currentTextIndex = 0;
+            let currentCharIndex = 0;
+            let isDeleting = false;
+            
+            const rotateText = () => {
+                const currentText = texts[currentTextIndex];
+                
+                if (!isDeleting) {
+                    typewriterSubtitle.innerHTML = currentText.substring(0, currentCharIndex + 1);
+                    currentCharIndex++;
+                    
+                    if (currentCharIndex === currentText.length) {
+                        isDeleting = true;
+                        setTimeout(rotateText, 2000); // Wait before deleting
+                        return;
+                    }
+                } else {
+                    typewriterSubtitle.innerHTML = currentText.substring(0, currentCharIndex - 1);
+                    currentCharIndex--;
+                    
+                    if (currentCharIndex === 0) {
+                        isDeleting = false;
+                        currentTextIndex = (currentTextIndex + 1) % texts.length;
+                    }
+                }
+                
+                const typingSpeed = isDeleting ? 50 : 150;
+                setTimeout(rotateText, typingSpeed);
+            };
+            
+            // Start subtitle typing after main title is done
+            setTimeout(rotateText, 2000);
+        }
+    }
+    
+    // Initialize typewriter effects
+    initTypewriter();
+
+    // Parallax effect for hero particles
+    function initParallaxEffect() {
+        const hero = document.querySelector('.hero');
+        const particles = document.querySelectorAll('.particle');
+        
+        if (!hero || particles.length === 0) return;
+        
+        // Check if user prefers reduced motion
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (prefersReducedMotion) return;
+        
+        hero.addEventListener('mousemove', (e) => {
+            const rect = hero.getBoundingClientRect();
+            const x = (e.clientX - rect.left) / rect.width - 0.5;
+            const y = (e.clientY - rect.top) / rect.height - 0.5;
+            
+            particles.forEach((particle, index) => {
+                const speed = (index + 1) * 0.5;
+                const translateX = x * speed * 20;
+                const translateY = y * speed * 20;
+                
+                particle.style.transform = `translate(${translateX}px, ${translateY}px)`;
+            });
+        });
+        
+        hero.addEventListener('mouseleave', () => {
+            particles.forEach(particle => {
+                particle.style.transform = 'translate(0px, 0px)';
+            });
+        });
+    }
+    
+    // Initialize parallax effect
+    initParallaxEffect();
+
     // Mobile Navigation Toggle
     const hamburger = document.getElementById('hamburger');
     const navMenu = document.getElementById('nav-menu');
@@ -35,49 +139,26 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Smooth Scrolling for Navigation Links - FIXED
+    // Native smooth scrolling handled via CSS (scroll-behavior). Only prevent default if fragment is '#'.
     navLinks.forEach(link => {
         link.addEventListener('click', function(e) {
             const href = this.getAttribute('href');
-            
-            // Only handle internal links (starting with #)
-            if (href && href.startsWith('#')) {
-                e.preventDefault();
-                const targetId = href;
-                const targetSection = document.querySelector(targetId);
-                
-                if (targetSection) {
-                    const navbarHeight = document.querySelector('.navbar').offsetHeight || 70;
-                    const offsetTop = targetSection.getBoundingClientRect().top + window.pageYOffset - navbarHeight;
-                    
-                    window.scrollTo({
-                        top: offsetTop,
-                        behavior: 'smooth'
-                    });
-                }
-            }
+            if (href === '#') e.preventDefault();
         });
     });
 
     // Active Navigation Link Highlighting
-    function highlightActiveNavLink() {
-        const sections = document.querySelectorAll('section');
-        const scrollPos = window.scrollY + 100;
-
-        sections.forEach(section => {
-            const sectionTop = section.offsetTop;
-            const sectionHeight = section.offsetHeight;
-            const sectionId = section.getAttribute('id');
-            const correspondingNavLink = document.querySelector(`.nav-link[href="#${sectionId}"]`);
-
-            if (scrollPos >= sectionTop && scrollPos < sectionTop + sectionHeight) {
-                navLinks.forEach(link => link.classList.remove('active'));
-                if (correspondingNavLink) {
-                    correspondingNavLink.classList.add('active');
-                }
+    // Active Navigation Link Highlighting via IntersectionObserver
+    const sectionObserver = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const id = entry.target.id;
+                if (!id) return;
+                navLinks.forEach(l => l.classList.toggle('active', l.getAttribute('href') === `#${id}`));
             }
         });
-    }
+    }, { root: null, threshold: 0.5 });
+    document.querySelectorAll('section[id]').forEach(sec => sectionObserver.observe(sec));
 
     // Navbar Background Change on Scroll
     function updateNavbarOnScroll() {
@@ -97,16 +178,11 @@ document.addEventListener('DOMContentLoaded', function() {
     let ticking = false;
     function onScroll() {
         if (!ticking) {
-            requestAnimationFrame(() => {
-                highlightActiveNavLink();
-                updateNavbarOnScroll();
-                ticking = false;
-            });
+            requestAnimationFrame(() => { updateNavbarOnScroll(); ticking = false; });
             ticking = true;
         }
     }
-
-    window.addEventListener('scroll', onScroll);
+    window.addEventListener('scroll', onScroll, { passive: true });
 
     // Removed scroll-triggered fade-in animations for a cleaner, instant render
 
@@ -183,12 +259,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const color = colors[type] || colors.info;
 
-        notification.innerHTML = `
-            <div class="notification-content">
-                <span class="notification-message">${message}</span>
-                <button class="notification-close" type="button">×</button>
-            </div>
-        `;
+        notification.innerHTML = `<div class="notification-content"><span class="notification-message">${message}</span><button class="notification-close" type="button" aria-label="Close notification">×</button></div>`;
 
         // Add styles
         notification.style.cssText = `
@@ -280,25 +351,26 @@ document.addEventListener('DOMContentLoaded', function() {
     // Removed hero fade-in animation for immediate content visibility
 
     // Optimized parallax with requestAnimationFrame and throttling
-    let parallaxTicking = false;
-    function parallaxEffect() {
-        if (parallaxTicking) return;
-        parallaxTicking = true;
-        
-        requestAnimationFrame(() => {
-            if (window.innerWidth > 768) {
-                const scrolled = window.pageYOffset;
-                const heroSection = document.querySelector('.hero');
-                if (heroSection && scrolled < window.innerHeight) {
-                    const rate = scrolled * -0.1;
-                    heroSection.style.transform = `translateY(${rate}px)`;
+    // Parallax (respect reduced motion)
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!reduceMotion) {
+        let parallaxTicking = false;
+        const heroSection = document.querySelector('.hero');
+        function parallaxEffect() {
+            if (parallaxTicking || !heroSection) return;
+            parallaxTicking = true;
+            requestAnimationFrame(() => {
+                if (window.innerWidth > 768) {
+                    const scrolled = window.pageYOffset;
+                    if (scrolled < window.innerHeight) {
+                        heroSection.style.transform = `translateY(${scrolled * -0.1}px)`;
+                    }
                 }
-            }
-            parallaxTicking = false;
-        });
+                parallaxTicking = false;
+            });
+        }
+        window.addEventListener('scroll', parallaxEffect, { passive: true });
     }
-
-    window.addEventListener('scroll', parallaxEffect, { passive: true });
 
     // Achievements horizontal-on-vertical scroll (pinned)
     const achWrap = document.querySelector('#achievements.achievements--hscroll');
@@ -416,70 +488,22 @@ document.addEventListener('DOMContentLoaded', function() {
     const buttons = document.querySelectorAll('.btn');
     buttons.forEach(btn => {
         btn.addEventListener('click', function(e) {
-            // Create ripple effect
             const ripple = document.createElement('span');
             const rect = this.getBoundingClientRect();
             const size = Math.max(rect.width, rect.height);
+            ripple.className = 'ripple-circle';
             const x = e.clientX - rect.left - size / 2;
             const y = e.clientY - rect.top - size / 2;
-            
-            ripple.style.cssText = `
-                position: absolute;
-                width: ${size}px;
-                height: ${size}px;
-                left: ${x}px;
-                top: ${y}px;
-                background: rgba(255,255,255,0.3);
-                border-radius: 50%;
-                transform: scale(0);
-                animation: ripple 0.6s linear;
-                pointer-events: none;
-            `;
-            
-            this.style.position = 'relative';
-            this.style.overflow = 'hidden';
+            ripple.style.width = ripple.style.height = size + 'px';
+            ripple.style.left = x + 'px';
+            ripple.style.top = y + 'px';
             this.appendChild(ripple);
-            
-            setTimeout(() => {
-                if (ripple.parentElement) {
-                    ripple.remove();
-                }
-            }, 600);
+            setTimeout(() => ripple.remove(), 600);
         });
     });
 
     // Add ripple animation keyframes and other styles
-    const style = document.createElement('style');
-    style.textContent = `
-        @keyframes ripple {
-            to {
-                transform: scale(2);
-                opacity: 0;
-            }
-        }
-        
-        .nav-link.active {
-            color: #8B7355 !important;
-        }
-        
-        .nav-link.active::after {
-            width: 100% !important;
-        }
-        
-        .body.loaded {
-            opacity: 1;
-        }
-        
-        /* Ensure notification is always visible */
-        .notification {
-            font-weight: 500 !important;
-        }
-        
-        .notification-message {
-            word-wrap: break-word;
-        }
-    `;
-    document.head.appendChild(style);
+    // (Removed dynamic <style> injection; ripple & notification styles now in stylesheet)
 
     // Removed section reveal-on-scroll fades
 
