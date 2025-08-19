@@ -815,11 +815,11 @@ h1, h2, h3, h4, h5, h6 {
 
 @keyframes float {
   0%, 100% {
-    transform: translateY(0px) rotate(0deg);
+    transform: translate3d(0, 0, 0) rotate(0deg);
     opacity: 0.1;
   }
   50% {
-    transform: translateY(-30px) rotate(180deg);
+    transform: translate3d(0, -30px, 0) rotate(180deg);
     opacity: 0.3;
   }
 }
@@ -870,7 +870,7 @@ h1, h2, h3, h4, h5, h6 {
 @keyframes fadeUp {
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
   }
 }
 
@@ -1982,4 +1982,21 @@ textarea.form-control {
 .about, .experience, .projects, .contact {
   content-visibility: auto;
   contain-intrinsic-size: 800px 1200px; /* conservative fallback to avoid layout shift */
+}
+
+/* GPU acceleration for animations */
+.btn, .project-card, .achievement-card, .stat-card, .particle {
+  will-change: transform;
+  transform: translate3d(0, 0, 0); /* Force GPU layer */
+}
+
+.hero-particles .particle {
+  backface-visibility: hidden; /* Optimize 3D transforms */
+}
+
+/* Optimize scroll-based animations */
+.skills--hscroll .skills-grid-min,
+.achievements--hscroll .achievements-grid {
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
 }

@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize typewriter effects
     initTypewriter();
 
-    // Parallax effect for hero particles
+    // Optimized parallax with better performance
     function initParallaxEffect() {
         const hero = document.querySelector('.hero');
         const particles = document.querySelectorAll('.particle');
@@ -78,23 +78,32 @@ document.addEventListener('DOMContentLoaded', () => {
         const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         if (prefersReducedMotion) return;
         
+        let mouseTicking = false;
+        
         hero.addEventListener('mousemove', (e) => {
-            const rect = hero.getBoundingClientRect();
-            const x = (e.clientX - rect.left) / rect.width - 0.5;
-            const y = (e.clientY - rect.top) / rect.height - 0.5;
-            
-            particles.forEach((particle, index) => {
-                const speed = (index + 1) * 0.5;
-                const translateX = x * speed * 20;
-                const translateY = y * speed * 20;
-                
-                particle.style.transform = `translate(${translateX}px, ${translateY}px)`;
-            });
-        });
+            if (!mouseTicking) {
+                requestAnimationFrame(() => {
+                    const rect = hero.getBoundingClientRect();
+                    const x = (e.clientX - rect.left) / rect.width - 0.5;
+                    const y = (e.clientY - rect.top) / rect.height - 0.5;
+                    
+                    particles.forEach((particle, index) => {
+                        const speed = (index + 1) * 0.5;
+                        const translateX = x * speed * 20;
+                        const translateY = y * speed * 20;
+                        
+                        particle.style.transform = `translate3d(${translateX}px, ${translateY}px, 0)`;
+                    });
+                    
+                    mouseTicking = false;
+                });
+                mouseTicking = true;
+            }
+        }, { passive: true });
         
         hero.addEventListener('mouseleave', () => {
             particles.forEach(particle => {
-                particle.style.transform = 'translate(0px, 0px)';
+                particle.style.transform = 'translate3d(0, 0, 0)';
             });
         });
     }
@@ -167,11 +176,14 @@ document.addEventListener('DOMContentLoaded', () => {
         navbar.classList.toggle('navbar--scrolled', scrolled);
     }
 
-    // Scroll Event Listeners
+    // Scroll Event Listeners - Performance optimized
     let ticking = false;
     function onScroll() {
         if (!ticking) {
-            requestAnimationFrame(() => { updateNavbarOnScroll(); ticking = false; });
+            requestAnimationFrame(() => { 
+                updateNavbarOnScroll(); 
+                ticking = false; 
+            });
             ticking = true;
         }
     }
@@ -434,5 +446,13 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('load', function() {
         const loadTime = performance.now();
         console.log(`%cPage loaded in ${Math.round(loadTime)}ms`, 'color: #34495E;');
+        
+        // Optional: Report performance metrics
+        if ('getEntriesByType' in performance) {
+            const navigation = performance.getEntriesByType('navigation')[0];
+            if (navigation) {
+                console.log(`%cDOM Content Loaded: ${Math.round(navigation.domContentLoadedEventEnd - navigation.domContentLoadedEventStart)}ms`, 'color: #27ae60;');
+            }
+        }
     });
 });
