@@ -1,458 +1,80 @@
-// Portfolio JavaScript Functionality
+// Minimal, performance-focused portfolio script
+// Features: typewriter (title & rotating subtitle), nav toggle & highlighting, parallax, horizontal scroll sections,
+// ripple effect, contact form + notifications. Emphasis on: small surface, requestAnimationFrame, IntersectionObserver,
+// reduced-motion respect, visibility pause, event delegation, lazy/non-critical deferral.
 
-document.addEventListener('DOMContentLoaded', () => {
-    // Typewriter Effect for Hero Section
-    function initTypewriter() {
-        const typewriterElement = document.querySelector('.typewriter');
-        const typewriterSubtitle = document.querySelector('.typewriter-subtitle');
-        
-        // Main title typewriter effect
-        if (typewriterElement) {
-            const text = typewriterElement.dataset.text;
-            typewriterElement.innerHTML = '';
-            
-            let i = 0;
-            const SPEED = 100; // ms per character reference for timing
-            const start = performance.now() + 800; // delay
-            function step(ts){
-                if (ts < start) return requestAnimationFrame(step);
-                const elapsed = ts - start;
-                const targetIndex = Math.min(text.length, Math.floor(elapsed / SPEED));
-                if (targetIndex !== i){
-                    typewriterElement.textContent = text.slice(0, targetIndex);
-                    i = targetIndex;
-                }
-                if (i < text.length) {
-                    requestAnimationFrame(step);
-                }
-            }
-            requestAnimationFrame(step);
-        }
-        
-        // Subtitle rotating typewriter effect
-        if (typewriterSubtitle) {
-            const texts = typewriterSubtitle.dataset.texts.split(',');
-            let currentTextIndex = 0;
-            let currentCharIndex = 0;
-            let isDeleting = false;
-            
-            let nextSwitch = performance.now() + 2000; // wait after full word
-            let lastTs = performance.now();
-            function rotate(ts){
-                const dt = ts - lastTs; lastTs = ts;
-                const currentText = texts[currentTextIndex];
-                if (!isDeleting) {
-                    if (currentCharIndex < currentText.length) {
-                        currentCharIndex += (dt / 150); // speed factor
-                        typewriterSubtitle.textContent = currentText.slice(0, Math.min(currentText.length, Math.floor(currentCharIndex)));
-                        if (Math.floor(currentCharIndex) >= currentText.length){
-                            isDeleting = true; nextSwitch = ts + 2000; // pause before delete
-                        }
-                    }
-                } else {
-                    if (ts >= nextSwitch){
-                        currentCharIndex -= (dt / 50);
-                        typewriterSubtitle.textContent = currentText.slice(0, Math.max(0, Math.floor(currentCharIndex)));
-                        if (currentCharIndex <= 0){
-                            isDeleting = false; currentTextIndex = (currentTextIndex + 1) % texts.length; currentCharIndex = 0;
-                        }
-                    }
-                }
-                requestAnimationFrame(rotate);
-            }
-            setTimeout(()=>requestAnimationFrame(rotate), 2000);
-        }
-    }
-    
-    // Initialize typewriter effects
-    initTypewriter();
+(()=>{ 'use strict';
+const q=(s,sc=document)=>sc.querySelector(s); const qa=(s,sc=document)=>sc.querySelectorAll(s);
+const raf=cb=>requestAnimationFrame(cb);
+const prefersReduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    // Optimized parallax with better performance
-    function initParallaxEffect() {
-        const hero = document.querySelector('.hero');
-        const particles = document.querySelectorAll('.particle');
-        
-        if (!hero || particles.length === 0) return;
-        
-        // Check if user prefers reduced motion
-        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        if (prefersReducedMotion) return;
-        
-        let mouseTicking = false;
-        
-        hero.addEventListener('mousemove', (e) => {
-            if (!mouseTicking) {
-                requestAnimationFrame(() => {
-                    const rect = hero.getBoundingClientRect();
-                    const x = (e.clientX - rect.left) / rect.width - 0.5;
-                    const y = (e.clientY - rect.top) / rect.height - 0.5;
-                    
-                    particles.forEach((particle, index) => {
-                        const speed = (index + 1) * 0.5;
-                        const translateX = x * speed * 20;
-                        const translateY = y * speed * 20;
-                        
-                        particle.style.transform = `translate3d(${translateX}px, ${translateY}px, 0)`;
-                    });
-                    
-                    mouseTicking = false;
-                });
-                mouseTicking = true;
-            }
-        }, { passive: true });
-        
-        hero.addEventListener('mouseleave', () => {
-            particles.forEach(particle => {
-                particle.style.transform = 'translate3d(0, 0, 0)';
-            });
-        });
-    }
-    
-    // Initialize parallax effect
-    initParallaxEffect();
+// --- Typewriter ------------------------------------------------------------
+function typewriter(){
+  const title=q('.typewriter'); const sub=q('.typewriter-subtitle');
+  if(!title && !sub) return;
+  if(prefersReduce){ if(title) title.textContent=title.dataset.text||''; if(sub){ const f=(sub.dataset.texts||'').split(',')[0]; if(f) sub.textContent=f; } return; }
+  if(title){
+    const text=title.dataset.text||''; let i=0; const start=performance.now()+600; const speed=90;
+    const step=t=>{ if(document.hidden) return raf(step); if(t<start) return raf(step); const tgt=Math.min(text.length,Math.floor((t-start)/speed)); if(tgt!==i){ i=tgt; title.textContent=text.slice(0,i); } if(i<text.length) raf(step); };
+    title.textContent=''; raf(step);
+  }
+  if(sub){
+    const words=(sub.dataset.texts||'').split(',').map(w=>w.trim()).filter(Boolean); if(!words.length) return;
+    let wi=0, chars=0, del=false, pause=0, last=performance.now();
+    const loop=t=>{ if(document.hidden){ last=t; return raf(loop);} const dt=t-last; last=t; const w=words[wi]; if(!del){ chars+=dt/140; if(chars>=w.length){ chars=w.length; del=true; pause=t+1800; } } else if(t>pause){ chars-=dt/110; if(chars<=0){ chars=0; del=false; wi=(wi+1)%words.length; } } sub.textContent=w.slice(0,Math.floor(Math.max(0,Math.min(w.length,chars)))); raf(loop); };
+    raf(loop);
+  }
+}
 
-    // Mobile Navigation Toggle
-    const hamburger = document.getElementById('hamburger');
-    const navMenu = document.getElementById('nav-menu');
-    const navLinks = document.querySelectorAll('.nav-link');
+// --- Navigation + Highlight ------------------------------------------------
+function navigation(){
+  const hamburger=q('#hamburger'); const menu=q('#nav-menu'); const links=qa('.nav-link'); const navbar=q('.navbar');
+  if(hamburger && menu){
+    hamburger.addEventListener('click',()=>{ hamburger.classList.toggle('active'); menu.classList.toggle('active'); document.body.style.overflow=menu.classList.contains('active')?'hidden':''; });
+    document.addEventListener('click',e=>{ if(!hamburger.contains(e.target)&&!menu.contains(e.target)){ hamburger.classList.remove('active'); menu.classList.remove('active'); document.body.style.overflow=''; } });
+  }
+  links.forEach(a=>a.addEventListener('click',e=>{ if(a.getAttribute('href')==='#') e.preventDefault(); if(menu&&menu.classList.contains('active')){ hamburger.classList.remove('active'); menu.classList.remove('active'); document.body.style.overflow=''; }}));
+  const sections=qa('section[id]'); if(sections.length){
+    const io=new IntersectionObserver(es=>{
+      es.forEach(en=>{ if(!en.isIntersecting) return; const id=en.target.id; links.forEach(l=>{ const match=l.getAttribute('href')===`#${id}`; l.classList.toggle('active',match); match?l.setAttribute('aria-current','true'):l.removeAttribute('aria-current'); }); });
+    },{threshold:.5}); sections.forEach(s=>io.observe(s));
+  }
+  if(navbar){ let ticking=false; const onScroll=()=>{ if(ticking) return; ticking=true; raf(()=>{ navbar.classList.toggle('navbar--scrolled',window.scrollY>50); ticking=false; }); }; window.addEventListener('scroll',onScroll,{passive:true}); onScroll(); }
+  let rT; window.addEventListener('resize',()=>{ clearTimeout(rT); rT=setTimeout(()=>{ if(window.innerWidth>768 && menu){ hamburger.classList.remove('active'); menu.classList.remove('active'); document.body.style.overflow=''; } },180); },{passive:true});
+}
 
-    // Toggle mobile menu
-    if (hamburger && navMenu) {
-        hamburger.addEventListener('click', function() {
-            hamburger.classList.toggle('active');
-            navMenu.classList.toggle('active');
-            document.body.style.overflow = navMenu.classList.contains('active') ? 'hidden' : '';
-        });
-    }
+// --- Parallax (pointer + subtle scroll) ------------------------------------
+function parallax(){ if(prefersReduce) return; const hero=q('.hero'); if(!hero) return; const particles=qa('.particle',hero); let rect=hero.getBoundingClientRect(); const upd=()=>rect=hero.getBoundingClientRect(); window.addEventListener('resize',upd,{passive:true});
+  let pmTick=false; hero.addEventListener('pointermove',e=>{ if(pmTick) return; pmTick=true; raf(()=>{ if(document.hidden){ pmTick=false; return; } const x=(e.clientX-rect.left-rect.width/2)/(rect.width/2); const y=(e.clientY-rect.top-rect.height/2)/(rect.height/2); particles.forEach((p,i)=>{ const f=(i%2?0.3:0.5)*((i%3)+1); p.style.transform=`translate3d(${(x*14*f).toFixed(2)}px, ${(y*10*f).toFixed(2)}px,0)`; }); pmTick=false; }); },{passive:true}); hero.addEventListener('pointerleave',()=>particles.forEach(p=>p.style.transform='')); let scTick=false; const onScroll=()=>{ if(scTick) return; scTick=true; raf(()=>{ if(window.innerWidth>768 && !document.hidden){ const s=window.pageYOffset; if(s<window.innerHeight) hero.style.transform=`translateY(${(s*-0.09).toFixed(2)}px)`; } scTick=false; }); }; window.addEventListener('scroll',onScroll,{passive:true}); upd(); }
 
-    // Close mobile menu when clicking on a nav link
-    navLinks.forEach(link => {
-        link.addEventListener('click', function() {
-            if (hamburger && navMenu) {
-                hamburger.classList.remove('active');
-                navMenu.classList.remove('active');
-                document.body.style.overflow = '';
-            }
-        });
-    });
+// --- Horizontal Scroll Sections -------------------------------------------
+function horizontalScroll(){ const defs=[['.skills.skills--hscroll','.skills.skills--hscroll .skills-grid-min','--hscroll-height'],['#achievements.achievements--hscroll','#achievements.achievements--hscroll .achievements-grid','--ach-h']]; const navH=()=>q('.navbar')?.offsetHeight||70; const setup=(wrapSel,rowSel,cssVar)=>{ const wrap=q(wrapSel); const row=q(rowSel); if(!wrap||!row) return; let enabled=false,maxX=0,start=0,end=0; function layout(){ enabled=window.innerWidth>900; if(!enabled){ wrap.style.removeProperty(cssVar); wrap.removeAttribute('data-hscroll-ready'); row.style.transform=''; return; } const container=wrap.querySelector('.container'); maxX=Math.max(0,row.scrollWidth-container.clientWidth); const travel=maxX*1.8+300; wrap.style.setProperty(cssVar,`${Math.max(travel,window.innerHeight-navH()+200)}px`); wrap.setAttribute('data-hscroll-ready','true'); start=navH(); end=window.innerHeight; } let tick=false; function onScroll(){ if(!enabled||tick) return; tick=true; raf(()=>{ const r=wrap.getBoundingClientRect(); const total=r.height-end+start; if(r.top<=start && r.bottom>end){ const prog=Math.min(1,Math.max(0,(start-r.top)/Math.max(1,total))); row.style.transform=`translate3d(${-prog*maxX}px,0,0)`; } else if(r.top>start){ row.style.transform='translate3d(0,0,0)'; } else if(r.bottom<=end){ row.style.transform=`translate3d(${-maxX}px,0,0)`; } tick=false; }); } layout(); onScroll(); window.addEventListener('resize',()=>{ layout(); onScroll(); },{passive:true}); window.addEventListener('scroll',onScroll,{passive:true}); }; defs.forEach(d=>setup(...d)); }
 
-    // Close mobile menu when clicking outside
-    document.addEventListener('click', function(event) {
-        if (hamburger && navMenu && !hamburger.contains(event.target) && !navMenu.contains(event.target)) {
-            hamburger.classList.remove('active');
-            navMenu.classList.remove('active');
-            document.body.style.overflow = '';
-        }
-    });
+// --- Ripple (delegated) ---------------------------------------------------
+function rippleDelegated(){ document.addEventListener('click',e=>{ const btn=e.target.closest('.btn'); if(!btn) return; const r=btn.getBoundingClientRect(); const size=Math.max(r.width,r.height); const span=document.createElement('span'); span.className='ripple-circle'; span.style.width=span.style.height=size+'px'; span.style.left=(e.clientX-r.left-size/2)+'px'; span.style.top=(e.clientY-r.top-size/2)+'px'; btn.appendChild(span); setTimeout(()=>span.remove(),520); }); }
 
-    // Native smooth scrolling handled via CSS (scroll-behavior). Only prevent default if fragment is '#'.
-    navLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
-            const href = this.getAttribute('href');
-            if (href === '#') e.preventDefault();
-        });
-    });
+// --- Notifications + Contact Form ----------------------------------------
+function contact(){ const form=q('#contact-form'); if(!form) return; const email=/^[^\s@]+@[^\s@]+\.[^\s@]+$/; let note=null; const show=(msg,type='info')=>{ if(!note){ note=document.createElement('div'); document.body.appendChild(note); } note.className=`notification notification--${type}`; note.setAttribute('role','status'); note.setAttribute('aria-live','polite'); note.innerHTML=`<div class="notification-content"><span class="notification-message">${msg}</span><button class="notification-close" type="button" aria-label="Close">×</button></div>`; requestAnimationFrame(()=>note.classList.add('notification--visible')); clearTimeout(show._t); show._t=setTimeout(()=>{ hide(); },4800); }; const hide=()=>{ if(note){ note.classList.remove('notification--visible'); setTimeout(()=>note&&note.remove(),280); note=null; } }; document.addEventListener('click',e=>{ if(e.target.closest('.notification-close')) hide(); }); form.addEventListener('submit',e=>{ e.preventDefault(); const fd=new FormData(form); const data={ name:fd.get('name')?.trim(), email:fd.get('email')?.trim(), subject:fd.get('subject')?.trim(), message:fd.get('message')?.trim() }; if(Object.values(data).some(v=>!v)){ show('Please fill in all fields.','error'); return; } if(!email.test(data.email)){ show('Please enter a valid email address.','error'); return; } const btn=form.querySelector('button[type="submit"]'); const orig=btn.textContent; btn.textContent='Sending...'; btn.disabled=true; btn.style.opacity='0.7'; setTimeout(()=>{ show('Thank you for your message! I\'ll get back to you soon.','success'); form.reset(); btn.textContent=orig; btn.disabled=false; btn.style.opacity='1'; },1400); }); }
 
-    // Active Navigation Link Highlighting
-    // Active Navigation Link Highlighting via IntersectionObserver
-    const sectionObserver = new IntersectionObserver(entries => {
-        entries.forEach(entry => {
-            if (!entry.isIntersecting) return;
-            const id = entry.target.id; if (!id) return;
-            navLinks.forEach(l => {
-                const match = l.getAttribute('href') === `#${id}`;
-                l.classList.toggle('active', match);
-                if (match) { l.setAttribute('aria-current','true'); } else { l.removeAttribute('aria-current'); }
-            });
-        });
-    }, { threshold: 0.5 });
-    document.querySelectorAll('section[id]').forEach(sec => sectionObserver.observe(sec));
-
-    // Navbar Background Change on Scroll
-    const navbar = document.querySelector('.navbar');
-    function updateNavbarOnScroll() {
-        if (!navbar) return;
-        const scrolled = window.scrollY > 50;
-        navbar.classList.toggle('navbar--scrolled', scrolled);
-    }
-
-    // Scroll Event Listeners - Performance optimized
-    let ticking = false;
-    function onScroll() {
-        if (!ticking) {
-            requestAnimationFrame(() => { 
-                updateNavbarOnScroll(); 
-                ticking = false; 
-            });
-            ticking = true;
-        }
-    }
-    window.addEventListener('scroll', onScroll, { passive: true });
-
-    // Removed scroll-triggered fade-in animations for a cleaner, instant render
-
-    // These elements don't exist in current HTML - removing unused code
-
-    // Optimized: Single hover effect for project cards using CSS transitions
-
-    // Contact Form Handling - FIXED
-    const contactForm = document.getElementById('contact-form');
-    if (contactForm) {
-        contactForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const formData = new FormData(this);
-            const name = formData.get('name').trim();
-            const email = formData.get('email').trim();
-            const subject = formData.get('subject').trim();
-            const message = formData.get('message').trim();
-
-            // Basic form validation
-            if (!name || !email || !subject || !message) {
-                showNotification('Please fill in all fields.', 'error');
-                return;
-            }
-
-            if (!isValidEmail(email)) {
-                showNotification('Please enter a valid email address.', 'error');
-                return;
-            }
-
-            // Simulate form submission
-            const submitBtn = this.querySelector('button[type="submit"]');
-            const originalText = submitBtn.textContent;
-            
-            submitBtn.textContent = 'Sending...';
-            submitBtn.disabled = true;
-            submitBtn.style.opacity = '0.7';
-
-            // Simulate API call delay
-            setTimeout(() => {
-                showNotification('Thank you for your message! I\'ll get back to you soon.', 'success');
-                this.reset();
-                submitBtn.textContent = originalText;
-                submitBtn.disabled = false;
-                submitBtn.style.opacity = '1';
-            }, 1500);
-        });
-    }
-
-    // Email Validation Helper
-    function isValidEmail(email) {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email);
-    }
-
-    // Notification System - ENHANCED
-    function showNotification(message, type = 'info') {
-        document.querySelectorAll('.notification').forEach(n => n.remove());
-        const notification = document.createElement('div');
-        notification.className = `notification notification--${type}`;
-        notification.setAttribute('role','status');
-        notification.setAttribute('aria-live','polite');
-        notification.innerHTML = `<div class="notification-content"><span class="notification-message">${message}</span><button class="notification-close" type="button" aria-label="Close notification">×</button></div>`;
-        const closeBtn = notification.querySelector('.notification-close');
-        closeBtn.addEventListener('click', () => dismiss());
-        function dismiss(){
-            notification.classList.remove('notification--visible');
-            setTimeout(()=>notification.remove(),300);
-        }
-        document.body.appendChild(notification);
-        requestAnimationFrame(()=>notification.classList.add('notification--visible'));
-        setTimeout(()=>dismiss(), 5000);
-    }
-
-    // Removed hero fade-in animation for immediate content visibility
-
-    // Optimized parallax with requestAnimationFrame and throttling
-    // Parallax (respect reduced motion)
-    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (!reduceMotion) {
-        let parallaxTicking = false;
-        const heroSection = document.querySelector('.hero');
-        function parallaxEffect() {
-            if (parallaxTicking || !heroSection) return;
-            parallaxTicking = true;
-            requestAnimationFrame(() => {
-                if (window.innerWidth > 768) {
-                    const scrolled = window.pageYOffset;
-                    if (scrolled < window.innerHeight) {
-                        heroSection.style.transform = `translateY(${scrolled * -0.1}px)`;
-                    }
-                }
-                parallaxTicking = false;
-            });
-        }
-        window.addEventListener('scroll', parallaxEffect, { passive: true });
-    }
-
-    // Achievements horizontal-on-vertical scroll (pinned)
-    const achWrap = document.querySelector('#achievements.achievements--hscroll');
-    const achRow = document.querySelector('#achievements.achievements--hscroll .achievements-grid');
-    if (achWrap && achRow) {
-        function layoutAchHScroll() {
-            // Enable pinned behavior only on larger screens
-            const enablePinned = window.innerWidth > 900;
-            if (!enablePinned) {
-                achWrap.style.removeProperty('--ach-h');
-                achWrap.removeAttribute('data-hscroll-ready');
-                achRow.style.transform = 'none';
-                return;
-            }
-            const navbarH = (document.querySelector('.navbar')?.offsetHeight || 70);
-            const viewportH = window.innerHeight;
-            const stickyH = viewportH - navbarH - 16;
-            const container = achWrap.querySelector('.container');
-            const overflowX = Math.max(0, achRow.scrollWidth - container.clientWidth);
-            const SPEED_RATIO = 1.8;
-            const travel = overflowX * SPEED_RATIO + 300;
-            achWrap.style.setProperty('--ach-h', `${Math.max(travel, stickyH + 200)}px`);
-            achWrap.setAttribute('data-hscroll-ready', 'true');
-        }
-
-        let rafA;
-        function onAchHScroll() {
-            if (window.innerWidth <= 900) return; // disable on small screens
-            const rect = achWrap.getBoundingClientRect();
-            const navbarH = (document.querySelector('.navbar')?.offsetHeight || 70);
-            const start = navbarH;
-            const end = window.innerHeight;
-            const container = achWrap.querySelector('.container');
-            const maxX = Math.max(0, achRow.scrollWidth - container.clientWidth);
-
-            if (rect.top <= start && rect.bottom > end) {
-                const totalRange = rect.height - end + start;
-                const progress = Math.min(1, Math.max(0, (start - rect.top) / Math.max(1, totalRange)));
-                const tx = -progress * maxX;
-                achRow.style.transform = `translate3d(${tx}px,0,0)`;
-            } else if (rect.top > start) {
-                achRow.style.transform = 'translate3d(0,0,0)';
-            } else if (rect.bottom <= end) {
-                achRow.style.transform = `translate3d(${-maxX}px,0,0)`;
-            }
-        }
-
-        function onScrollAch() { if (rafA) return; rafA = requestAnimationFrame(() => { onAchHScroll(); rafA = null; }); }
-
-        layoutAchHScroll();
-        onAchHScroll();
-        window.addEventListener('resize', () => { layoutAchHScroll(); onAchHScroll(); });
-        window.addEventListener('scroll', onScrollAch, { passive: true });
-    }
-
-    // Skills horizontal-on-vertical scroll (pinned): map section scroll progress to X translate
-    const skillsSection = document.querySelector('.skills.skills--hscroll');
-    const skillsRow = document.querySelector('.skills.skills--hscroll .skills-grid-min');
-    if (skillsSection && skillsRow) {
-        // Prepare heights so vertical scroll length equals the horizontal overflow we need
-        function layoutHScroll() {
-            const enablePinned = window.innerWidth > 900;
-            if (!enablePinned) {
-                skillsSection.style.removeProperty('--hscroll-height');
-                skillsSection.removeAttribute('data-hscroll-ready');
-                skillsRow.style.transform = 'none';
-                return;
-            }
-            const navbarH = (document.querySelector('.navbar')?.offsetHeight || 70);
-            const viewportH = window.innerHeight;
-            const stickyH = viewportH - navbarH - 16; // padding allowance
-            const container = skillsSection.querySelector('.container');
-            const overflowX = Math.max(0, skillsRow.scrollWidth - container.clientWidth);
-            const SPEED_RATIO = 1.8; // >1 means slower horizontal movement per vertical pixel
-            const travel = overflowX * SPEED_RATIO + 300;
-            skillsSection.style.setProperty('--hscroll-height', `${Math.max(travel, stickyH + 200)}px`);
-            skillsSection.setAttribute('data-hscroll-ready', 'true');
-        }
-
-        let rAF;
-        function onHScroll() {
-            if (window.innerWidth <= 900) return; // disable on small screens
-            const rect = skillsSection.getBoundingClientRect();
-            const navbarH = (document.querySelector('.navbar')?.offsetHeight || 70);
-            const start = navbarH; // when section top hits sticky top
-            const end = window.innerHeight; // when section bottom leaves viewport
-            const container = skillsSection.querySelector('.container');
-            const maxX = Math.max(0, skillsRow.scrollWidth - container.clientWidth);
-
-            if (rect.top <= start && rect.bottom > end) {
-                // progress from 0..1 while pinned
-                const totalRange = rect.height - end + start;
-                const progress = Math.min(1, Math.max(0, (start - rect.top) / Math.max(1, totalRange)));
-                const tx = -progress * maxX;
-                skillsRow.style.transform = `translate3d(${tx}px,0,0)`;
-            } else if (rect.top > start) {
-                skillsRow.style.transform = 'translate3d(0,0,0)';
-            } else if (rect.bottom <= end) {
-                skillsRow.style.transform = `translate3d(${-maxX}px,0,0)`;
-            }
-        }
-
-        // throttle via rAF
-        function onScrollPinned() {
-            if (rAF) return; rAF = requestAnimationFrame(() => { onHScroll(); rAF = null; });
-        }
-
-        layoutHScroll();
-        onHScroll();
-        window.addEventListener('resize', () => { layoutHScroll(); onHScroll(); });
-        window.addEventListener('scroll', onScrollPinned, { passive: true });
-    }
-
-    // Button Click Effects
-    const buttons = document.querySelectorAll('.btn');
-    buttons.forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            const ripple = document.createElement('span');
-            const rect = this.getBoundingClientRect();
-            const size = Math.max(rect.width, rect.height);
-            ripple.className = 'ripple-circle';
-            const x = e.clientX - rect.left - size / 2;
-            const y = e.clientY - rect.top - size / 2;
-            ripple.style.width = ripple.style.height = size + 'px';
-            ripple.style.left = x + 'px';
-            ripple.style.top = y + 'px';
-            this.appendChild(ripple);
-            setTimeout(() => ripple.remove(), 600);
-        });
-    });
-
-    // Add ripple animation keyframes and other styles
-    // (Removed dynamic <style> injection; ripple & notification styles now in stylesheet)
-
-    // Removed section reveal-on-scroll fades
-
-    // Handle resize events
-    let resizeTimeout;
-    window.addEventListener('resize', function() {
-        clearTimeout(resizeTimeout);
-        resizeTimeout = setTimeout(function() {
-            // Close mobile menu on resize to desktop
-            if (window.innerWidth > 768 && hamburger && navMenu) {
-                hamburger.classList.remove('active');
-                navMenu.classList.remove('active');
-                document.body.style.overflow = '';
-            }
-        }, 250);
-    });
-
-    // Add loading state management
-    document.body.classList.add('loaded');
-
-    // Console welcome message
-    console.log('%c👋 Welcome to Lokesh Boddapu\'s Portfolio!', 'color: #2C3E50; font-size: 16px; font-weight: bold;');
-    console.log('%cFeel free to explore the code and connect with me!', 'color: #8B7355; font-size: 14px;');
-    
-    // Performance monitoring
-    window.addEventListener('load', function() {
-        const loadTime = performance.now();
-        console.log(`%cPage loaded in ${Math.round(loadTime)}ms`, 'color: #34495E;');
-        
-        // Optional: Report performance metrics
-        if ('getEntriesByType' in performance) {
-            const navigation = performance.getEntriesByType('navigation')[0];
-            if (navigation) {
-                console.log(`%cDOM Content Loaded: ${Math.round(navigation.domContentLoadedEventEnd - navigation.domContentLoadedEventStart)}ms`, 'color: #27ae60;');
-            }
-        }
-    });
+// --- Init (critical first, extras deferred) --------------------------------
+document.addEventListener('DOMContentLoaded',()=>{
+  typewriter();
+  navigation();
+  contact();
+  (window.requestIdleCallback?requestIdleCallback:fn=>setTimeout(fn,50))(()=>{ parallax(); horizontalScroll(); rippleDelegated(); });
+  document.body.classList.add('loaded');
 });
+
+})();
+
+// Concepts used:
+// 1. requestAnimationFrame-driven animations (smooth typing & parallax).
+// 2. IntersectionObserver for section-based nav highlighting.
+// 3. Feature detection & progressive enhancement (requestIdleCallback fallback, reduced-motion media query).
+// 4. Event delegation (single click for ripple & notification close).
+// 5. Throttling via rAF state flags instead of setInterval/scroll storms.
+// 6. Visibility-aware loops (skip work when tab hidden implicitly via short-circuit patterns).
+// 7. Minimal DOM queries (selectors stored per use; heavy operations throttled & conditional).
+// 8. Accessibility: aria-current updates, aria-live notifications, focus-safe close button.
+// 9. Responsive behavior (auto-close nav on resize, width gates for horizontal scroll & parallax intensity).
+// 10. Single reusable notification element reduces DOM churn & memory.
