@@ -1,6 +1,6 @@
 // Portfolio JavaScript Functionality
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', () => {
     // Typewriter Effect for Hero Section
     function initTypewriter() {
         const typewriterElement = document.querySelector('.typewriter');
@@ -12,21 +12,21 @@ document.addEventListener('DOMContentLoaded', function() {
             typewriterElement.innerHTML = '';
             
             let i = 0;
-            const typeWriter = () => {
-                if (i < text.length) {
-                    typewriterElement.innerHTML += text.charAt(i);
-                    i++;
-                    setTimeout(typeWriter, 100);
-                } else {
-                    // Remove cursor after typing is complete
-                    setTimeout(() => {
-                        typewriterElement.style.borderRight = 'none';
-                    }, 1000);
+            const SPEED = 100; // ms per character reference for timing
+            const start = performance.now() + 800; // delay
+            function step(ts){
+                if (ts < start) return requestAnimationFrame(step);
+                const elapsed = ts - start;
+                const targetIndex = Math.min(text.length, Math.floor(elapsed / SPEED));
+                if (targetIndex !== i){
+                    typewriterElement.textContent = text.slice(0, targetIndex);
+                    i = targetIndex;
                 }
-            };
-            
-            // Start typing after a delay
-            setTimeout(typeWriter, 800);
+                if (i < text.length) {
+                    requestAnimationFrame(step);
+                }
+            }
+            requestAnimationFrame(step);
         }
         
         // Subtitle rotating typewriter effect
@@ -36,34 +36,31 @@ document.addEventListener('DOMContentLoaded', function() {
             let currentCharIndex = 0;
             let isDeleting = false;
             
-            const rotateText = () => {
+            let nextSwitch = performance.now() + 2000; // wait after full word
+            let lastTs = performance.now();
+            function rotate(ts){
+                const dt = ts - lastTs; lastTs = ts;
                 const currentText = texts[currentTextIndex];
-                
                 if (!isDeleting) {
-                    typewriterSubtitle.innerHTML = currentText.substring(0, currentCharIndex + 1);
-                    currentCharIndex++;
-                    
-                    if (currentCharIndex === currentText.length) {
-                        isDeleting = true;
-                        setTimeout(rotateText, 2000); // Wait before deleting
-                        return;
+                    if (currentCharIndex < currentText.length) {
+                        currentCharIndex += (dt / 150); // speed factor
+                        typewriterSubtitle.textContent = currentText.slice(0, Math.min(currentText.length, Math.floor(currentCharIndex)));
+                        if (Math.floor(currentCharIndex) >= currentText.length){
+                            isDeleting = true; nextSwitch = ts + 2000; // pause before delete
+                        }
                     }
                 } else {
-                    typewriterSubtitle.innerHTML = currentText.substring(0, currentCharIndex - 1);
-                    currentCharIndex--;
-                    
-                    if (currentCharIndex === 0) {
-                        isDeleting = false;
-                        currentTextIndex = (currentTextIndex + 1) % texts.length;
+                    if (ts >= nextSwitch){
+                        currentCharIndex -= (dt / 50);
+                        typewriterSubtitle.textContent = currentText.slice(0, Math.max(0, Math.floor(currentCharIndex)));
+                        if (currentCharIndex <= 0){
+                            isDeleting = false; currentTextIndex = (currentTextIndex + 1) % texts.length; currentCharIndex = 0;
+                        }
                     }
                 }
-                
-                const typingSpeed = isDeleting ? 50 : 150;
-                setTimeout(rotateText, typingSpeed);
-            };
-            
-            // Start subtitle typing after main title is done
-            setTimeout(rotateText, 2000);
+                requestAnimationFrame(rotate);
+            }
+            setTimeout(()=>requestAnimationFrame(rotate), 2000);
         }
     }
     
@@ -151,27 +148,23 @@ document.addEventListener('DOMContentLoaded', function() {
     // Active Navigation Link Highlighting via IntersectionObserver
     const sectionObserver = new IntersectionObserver(entries => {
         entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                const id = entry.target.id;
-                if (!id) return;
-                navLinks.forEach(l => l.classList.toggle('active', l.getAttribute('href') === `#${id}`));
-            }
+            if (!entry.isIntersecting) return;
+            const id = entry.target.id; if (!id) return;
+            navLinks.forEach(l => {
+                const match = l.getAttribute('href') === `#${id}`;
+                l.classList.toggle('active', match);
+                if (match) { l.setAttribute('aria-current','true'); } else { l.removeAttribute('aria-current'); }
+            });
         });
-    }, { root: null, threshold: 0.5 });
+    }, { threshold: 0.5 });
     document.querySelectorAll('section[id]').forEach(sec => sectionObserver.observe(sec));
 
     // Navbar Background Change on Scroll
+    const navbar = document.querySelector('.navbar');
     function updateNavbarOnScroll() {
-        const navbar = document.querySelector('.navbar');
-        if (navbar) {
-            if (window.scrollY > 50) {
-                navbar.style.background = 'rgba(255, 255, 255, 0.98)';
-                navbar.style.boxShadow = '0 2px 20px rgba(44, 62, 80, 0.1)';
-            } else {
-                navbar.style.background = 'rgba(255, 255, 255, 0.95)';
-                navbar.style.boxShadow = 'none';
-            }
-        }
+        if (!navbar) return;
+        const scrolled = window.scrollY > 50;
+        navbar.classList.toggle('navbar--scrolled', scrolled);
     }
 
     // Scroll Event Listeners
@@ -240,112 +233,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Notification System - ENHANCED
     function showNotification(message, type = 'info') {
-        // Remove existing notifications
-        const existingNotifications = document.querySelectorAll('.notification');
-        existingNotifications.forEach(notification => {
-            notification.remove();
-        });
-
-        // Create notification element
+        document.querySelectorAll('.notification').forEach(n => n.remove());
         const notification = document.createElement('div');
         notification.className = `notification notification--${type}`;
-        
-        // Set notification styles based on type
-        const colors = {
-            success: { bg: '#2C3E50', border: '#8B7355' },
-            error: { bg: '#e74c3c', border: '#c0392b' },
-            info: { bg: '#34495E', border: '#2C3E50' }
-        };
-
-        const color = colors[type] || colors.info;
-
+        notification.setAttribute('role','status');
+        notification.setAttribute('aria-live','polite');
         notification.innerHTML = `<div class="notification-content"><span class="notification-message">${message}</span><button class="notification-close" type="button" aria-label="Close notification">×</button></div>`;
-
-        // Add styles
-        notification.style.cssText = `
-            position: fixed;
-            top: 100px;
-            right: 20px;
-            background: ${color.bg};
-            color: white;
-            padding: 1rem 1.5rem;
-            border-radius: 8px;
-            border-left: 4px solid ${color.border};
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            z-index: 10000;
-            max-width: 400px;
-            min-width: 300px;
-            transform: translateX(120%);
-            transition: transform 0.3s ease;
-            font-family: 'Inter', sans-serif;
-            font-size: 14px;
-            line-height: 1.4;
-        `;
-
-        const notificationContent = notification.querySelector('.notification-content');
-        notificationContent.style.cssText = `
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 1rem;
-        `;
-
         const closeBtn = notification.querySelector('.notification-close');
-        closeBtn.style.cssText = `
-            background: none;
-            border: none;
-            color: white;
-            font-size: 1.5rem;
-            cursor: pointer;
-            padding: 0;
-            width: 24px;
-            height: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            transition: background 0.3s ease;
-            flex-shrink: 0;
-        `;
-
-        // Close button functionality
-        closeBtn.addEventListener('click', function() {
-            if (notification.parentElement) {
-                notification.style.transform = 'translateX(120%)';
-                setTimeout(() => {
-                    if (notification.parentElement) {
-                        notification.remove();
-                    }
-                }, 300);
-            }
-        });
-
-        closeBtn.addEventListener('mouseenter', function() {
-            this.style.background = 'rgba(255,255,255,0.2)';
-        });
-
-        closeBtn.addEventListener('mouseleave', function() {
-            this.style.background = 'none';
-        });
-
+        closeBtn.addEventListener('click', () => dismiss());
+        function dismiss(){
+            notification.classList.remove('notification--visible');
+            setTimeout(()=>notification.remove(),300);
+        }
         document.body.appendChild(notification);
-
-        // Animate in
-        requestAnimationFrame(() => {
-            notification.style.transform = 'translateX(0)';
-        });
-
-        // Auto remove after 5 seconds
-        setTimeout(() => {
-            if (notification.parentElement) {
-                notification.style.transform = 'translateX(120%)';
-                setTimeout(() => {
-                    if (notification.parentElement) {
-                        notification.remove();
-                    }
-                }, 300);
-            }
-        }, 5000);
+        requestAnimationFrame(()=>notification.classList.add('notification--visible'));
+        setTimeout(()=>dismiss(), 5000);
     }
 
     // Removed hero fade-in animation for immediate content visibility

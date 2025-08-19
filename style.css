@@ -651,6 +651,12 @@ h1, h2, h3, h4, h5, h6 {
   transition: all 0.3s ease;
 }
 
+/* Scrolled state applied via JS (reduces layout thrash from repeated inline style mutations) */
+.navbar.navbar--scrolled {
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 2px 20px rgba(44, 62, 80, 0.1);
+}
+
 .nav-container {
   max-width: 1200px;
   margin: 0 auto;
@@ -1966,3 +1972,6 @@ textarea.form-control {
 .notification-content { display:flex; justify-content:space-between; align-items:flex-start; gap:1rem; }
 .notification-close { background:none; border:none; color:#fff; font-size:1.5rem; cursor:pointer; padding:0; width:24px; height:24px; display:flex; align-items:center; justify-content:center; border-radius:50%; transition:background 0.3s ease; }
 .notification-close:hover { background:rgba(255,255,255,0.2); }
+/* Enter/exit animation handled by transform for GPU-friendly performance */
+.notification { transform: translateX(120%); transition: transform .3s ease; }
+.notification.notification--visible { transform: translateX(0); }
