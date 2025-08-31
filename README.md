@@ -26,7 +26,7 @@ A clean, responsive personal portfolio for showcasing experience, projects, and 
 ├── style.css           # Styles (design tokens + sections)
 ├── app.js              # Interactions (nav, scroll, forms, effects)
 ├── LokeshBoddapu.jpg   # Profile image
-├── Lokesh Boddapu - Resume.pdf  # Downloadable resume
+├── Lokesh-Boddapu-Resume.pdf  # Downloadable resume
 └── .gitignore
 ```
 
